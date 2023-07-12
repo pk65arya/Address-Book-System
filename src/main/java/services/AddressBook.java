@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class AddressBook {
     private static Scanner scanner = new Scanner(System.in);
     private static Map<String , Person> personMap = new HashMap();
+    private static Map<String, Map<String, Person>> addressBookMap = new HashMap();
     public static void main(String[] args) {
         addPersonDetail();
         boolean isExit = false;
@@ -97,6 +98,18 @@ public class AddressBook {
         } else {
             System.out.println("Record not exist");
         }
+    }
+    private static void addBook() {
+        Map<String, Person> newPersonMap = new HashMap();
+        Person newPerson;
+        newPerson = contactFields();
 
+        if (addressBookMap.get(newPerson.getCity()) != null)
+            newPersonMap = addressBookMap.get(newPerson.getCity());
+
+        newPersonMap.put(newPerson.getFirstName(), newPerson);
+        addressBookMap.put(newPerson.getCity(), newPersonMap);
+
+        System.out.println("\n\t\t" + addressBookMap.toString());
     }
 }
