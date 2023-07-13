@@ -1,11 +1,16 @@
 package services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import exception.ValidationException;
 import model.Person;
+
+import java.io.File;
+import java.util.LinkedHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+
 
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.stream.Collectors.toMap;
@@ -65,6 +70,7 @@ public class AddressBook {
                     break;
                 case 'P':
                     //print
+                    writeIntoFile();
                     System.out.print("\nEnter the city name to sort : ");
                     String sortCity = scanner.nextLine();
                     System.out.println("\n\t\t Without sorting : " + addressBookMap.toString());
@@ -176,7 +182,7 @@ public class AddressBook {
             Map<String, Person> temp = addressBookMap.get(city);
             Map<String, Person> sorted = temp.entrySet().stream()
                     .sorted(comparingByKey())
-                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2));
+                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,LinkedHashMap::new));
             return sorted;
         } catch (Exception e) {
             throw new ValidationException(e.getMessage());
@@ -186,8 +192,17 @@ public class AddressBook {
         try {
             Map<String, Map<String, Person>> sorted = addressBookMap.entrySet().stream()
                     .sorted(comparingByKey())
-                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2));
+                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,LinkedHashMap::new));
             return sorted;
+        } catch (Exception e) {
+            throw new ValidationException(e.getMessage());
+        }
+    }
+    private static void writeIntoFile() throws ValidationException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.writeValue(new File("outputData.json"),addressBookMap);
+            System.out.println("successfully");
         } catch (Exception e) {
             throw new ValidationException(e.getMessage());
         }
