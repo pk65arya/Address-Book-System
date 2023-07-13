@@ -29,9 +29,11 @@ public class AddressBook {
                     break;
                 case 'E':
                     //edit
+                    editContact();
                     break;
                 case 'D':
                     //delete
+                    deletePerson();
                     break;
                 case 'S':
                     //Show
