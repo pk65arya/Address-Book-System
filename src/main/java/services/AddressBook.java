@@ -1,15 +1,20 @@
 package services;
 
+
+import com.fasterxml.jackson.core.JsonGenerator;
+
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import exception.ValidationException;
 import model.Person;
 
 import java.io.File;
-import java.util.LinkedHashMap;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 import static java.util.Map.Entry.comparingByKey;
@@ -71,6 +76,7 @@ public class AddressBook {
                 case 'P':
                     //print
                     writeIntoFile();
+                    writeCSVIntoFile("csvOutput.csv");
                     System.out.print("\nEnter the city name to sort : ");
                     String sortCity = scanner.nextLine();
                     System.out.println("\n\t\t Without sorting : " + addressBookMap.toString());
@@ -207,4 +213,55 @@ public class AddressBook {
             throw new ValidationException(e.getMessage());
         }
     }
+    private static void writeCSVIntoFile(String filePath) throws ValidationException {
+        File file = new File(filePath);
+        try {
+            List<Person> list = addressBookMap.entrySet().stream().flatMap(e -> e.getValue().entrySet().stream()).map(m -> m.getValue()).collect(Collectors.toList());
+            list.stream().forEach(e -> System.out.println(e));
+
+            CsvMapper mapper = new CsvMapper();
+            mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+
+            CsvSchema schema = CsvSchema.builder().setUseHeader(true)
+                    .addColumn("firstName")
+                    .addColumn("lastName")
+                    .addColumn("address")
+                    .addColumn("city")
+                    .addColumn("state")
+                    .addColumn("zip")
+                    .addColumn("phone")
+                    .build();
+
+            ObjectWriter writer;
+            writer = mapper.writerFor(Person.class).with(schema);
+
+            writer.writeValues(file).writeAll(list);
+
+            System.out.println("Users saved to csv file under path: " + file);
+        } catch (IOException e) {
+            throw new ValidationException(e.getMessage());
+        }
+    }
+
+
+    private static void readCSV(String filePath) throws IOException {
+        File csvFile = new File(filePath);
+
+        CsvMapper csvMapper = new CsvMapper();
+
+        CsvSchema csvSchema = csvMapper
+                .typedSchemaFor(Person.class)
+                .withHeader()
+                .withColumnSeparator(',')
+                .withComments();
+
+        MappingIterator<Person> addressBookItem = csvMapper
+                .readerWithTypedSchemaFor(Person.class)
+                .with(csvSchema)
+                .readValues(csvFile);
+
+        List<Person> users = addressBookItem.readAll();
+        users.forEach(System.out::println);
+    }
+
 }
