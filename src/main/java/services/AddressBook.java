@@ -30,9 +30,19 @@ public class AddressBook {
                     break;
                 case 'E':
                     //edit
+                    System.out.print("\nEnter the first name of the person to edit : ");
+                    String firstName = scanner.nextLine();
+                    System.out.print("\nEnter the city name of the person to edit : ");
+                    String cityName = scanner.nextLine();
+                    editContact(firstName,cityName);
                     break;
                 case 'D':
                     //delete
+                    System.out.print("\nEnter the first name of the person to edit : ");
+                    String personName = scanner.nextLine();
+                    System.out.print("\nEnter the city name of the person to edit : ");
+                    String city = scanner.nextLine();
+                    deletePerson(personName,city);
                     break;
                 case 'S':
                     //Show
@@ -56,20 +66,17 @@ public class AddressBook {
         personMap.put(person.getFirstName(),person);
         System.out.println(personMap.toString());
     }
-    private static void editContact(){
-        System.out.print("\nEnter the first name of the person to edit : ");
-        String firstName = scanner.nextLine();
-        Person newPerson = personMap.get(firstName);
-        System.out.println(newPerson.toString());
-        if (personMap.get(firstName) != null){
-            Person person = contactFields();
-            for (int j = 0; j < personMap.size(); j++) {
-                if (personMap.get(firstName).getFirstName().equalsIgnoreCase(newPerson.getFirstName())) {
-                    personMap.put(person.getFirstName(), person);
-                }
-            }
+    private static void editContact(String firstName,String cityName){
+        personMap = addressBookMap.get(cityName);
+        System.out.println(personMap.toString());
+        if (addressBookMap.get(cityName).get(firstName) != null) {
+            Person editedPerson = contactFields();
+            personMap.put(editedPerson.getFirstName(), editedPerson);
+            addressBookMap.put(editedPerson.getCity(), personMap);
+        } else {
+            System.out.println("Record Not Found");
         }
-        System.out.println("\n\t\t" + personMap.toString());
+        System.out.println("\n\t\t" + addressBookMap.toString());
     }
     private static Person contactFields(){
         Person person = new Person();
@@ -87,17 +94,16 @@ public class AddressBook {
         person.setPhone(scanner.nextLine());
         return person;
     }
-    private static void deletePerson() {
-        System.out.print("\nEnter the first name of the person to delete : ");
-        String firstName = scanner.nextLine();
-        Person newPerson = personMap.get(firstName);
+    private static void deletePerson(String firstName,String cityName) {
+        Person newPerson = addressBookMap.get(cityName).get(firstName);
         System.out.println(newPerson.toString());
-        if (newPerson != null) {
-            personMap.remove(firstName);
+        if (addressBookMap.get(cityName).get(firstName) != null) {
+            addressBookMap.get(cityName).remove(firstName);
             System.out.println("Deleted Successfully");
         } else {
             System.out.println("Record not exist");
         }
+
     }
     private static void addBook() {
         Map<String, Person> newPersonMap = new HashMap();
